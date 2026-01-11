@@ -7,7 +7,6 @@
 
 一款功能强大的视频下载工具，支持 YouTube、Bilibili、Twitter 等 1000+ 网站，支持 4K/8K 超高清视频下载。
 
-![主界面预览](screenshots/main.png)
 
 ## ✨ 功能特性
 
@@ -49,21 +48,21 @@
 
 ## 🚀 快速开始
 
-### 方式一：直接下载 EXE（推荐）
+### 方式一：打包 EXE（推荐）
 
-1. 前往 [Releases](https://github.com/yourusername/VideoDownloader/releases) 页面
-2. 下载最新版 `VideoDownloader_v2.0.exe`
+1. 下载1.py
+2. 自行打包
 3. 双击运行即可使用
 
 ### 方式二：从源码运行
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/VideoDownloader.git
-cd VideoDownloader
+git clone https://github.com/amo123p/video-download.git
+cd video-download
 
 # 安装依赖
 pip install -r requirements.txt
 
 # 运行程序
-python video_downloader.py
+python video.py
