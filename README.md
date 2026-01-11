@@ -61,8 +61,5 @@
 git clone https://github.com/amo123p/video-download.git
 cd video-download
 
-# 安装依赖
-pip install -r requirements.txt
-
 # 运行程序
 python video.py
