@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="中国农历新年春节特效演示 - 包含烟花、红包、灯笼、纸屑、祝福语等互动特效">
+    <meta name="keywords" content="春节特效,农历新年,烟花,红包,灯笼,JavaScript特效">
+    <title>🧧 春节特效演示 | Chinese New Year Effects Demo</title>
+    <style>
+        /* ========== 基础样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ========== 主容器 ========== */
+        #index1 {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ========== 烟花画布 ========== */
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 997;
+        }
+
+        /* ========== 红包样式 ========== */
+        .red-envelope {
+            position: absolute;
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.5);
+            pointer-events: auto;
+            cursor: pointer;
+            animation: fall linear infinite;
+            z-index: 1001;
+            transition: transform 0.3s;
+        }
+
+        .red-envelope:hover {
+            transform: scale(1.1);
+        }
+
+        .red-envelope::before {
+            content: '福';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .red-envelope::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            border-radius: 5px 5px 0 0;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(calc(100vh + 100px)) rotate(360deg);
+            }
+        }
+
+        /* ========== 灯笼样式 ========== */
+        .lantern {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            z-index: 999;
+            animation: lanternSwing 3s ease-in-out infinite;
+        }
+
+        @keyframes lanternSwing {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .lantern-rope {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: #8B4513;
+            transform: translateX(-50%);
+        }
+
+        .lantern-body {
+            width: 100%;
+            height: 70px;
+            background: radial-gradient(ellipse at center, #ff4444 0%, #cc0000 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+            animation: lanternGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes lanternGlow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 68, 68, 0.8), 0 0 40px rgba(255, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 68, 68, 1), 0 0 60px rgba(255, 68, 68, 0.6);
+            }
+        }
+
+        .lantern-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .lantern-tassel {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            width: 20px;
+            height: 15px;
+            background: linear-gradient(to bottom, #ffd700, #ffaa00);
+            transform: translateX(-50%);
+            clip-path: polygon(50% 0%, 0% 30%, 20% 100%, 80% 100%, 100% 30%);
+        }
+
+        /* ========== 纸屑样式 ========== */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: confettiFall linear infinite;
+            z-index: 998;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(calc(100vh + 50px)) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ========== 祝福语样式 ========== */
+        .blessing-text {
+            position: absolute;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 30px rgba(255, 215, 0, 0.4),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: blessingFadeIn 3s ease-out forwards;
+            z-index: 1002;
+            pointer-events: none;
+        }
+
+        @keyframes blessingFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) translateY(-50px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1) translateY(50px);
+            }
+        }
+
+        /* ========== 演示内容 ========== */
+        .demo-content {
+            position: relative;
+            z-index: 1;
+            padding: 50px 20px;
+            color: white;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-content h1 {
+            font-size: clamp(36px, 8vw, 72px);
+            margin: 80px 0 20px;
+            color: #ffd700;
+            text-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.8),
+                3px 3px 6px rgba(0, 0, 0, 0.8);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .demo-content .subtitle {
+            font-size: clamp(18px, 3vw, 28px);
+            margin: 20px 0;
+            color: #ffeeaa;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 50px 0;
+            padding: 0 20px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            font-size: 16px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        /* ========== 控制面板 ========== */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls h3 {
+            color: #ffd700;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .controls button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(255, 68, 68, 0.4);
+        }
+
+        .controls button:hover {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.6);
+        }
+
+        .controls button:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 信息面板 ========== */
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            color: white;
+            max-width: 300px;
+        }
+
+        .info-panel h4 {
+            color: #ffd700;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .info-panel a {
+            color: #ffd700;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .info-panel a:hover {
+            color: #ffaa00;
+            text-decoration: underline;
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 768px) {
+            .controls {
+                top: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+
+            .controls h3 {
+                font-size: 16px;
+            }
+
+            .controls button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .info-panel {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .blessing-text {
+                font-size: 32px;
+            }
+        }
+
+        /* ========== 加载动画 ========== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主容器 -->
+    <div id="index1">
+        <!-- 烟花画布 -->
+        <canvas id="fireworks-canvas"></canvas>
+        
+        <!-- 演示内容 -->
+        <div class="demo-content fade-in">
+            <h1>🎉 春节快乐 恭喜发财 🎉</h1>
+            <p class="subtitle">Chinese New Year Effects Demo</p>
+            <p class="subtitle">中国农历新年节日特效完整演示</p>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🎆</div>
+                    <div class="feature-title">烟花特效</div>
+                    <div class="feature-desc">绚丽的烟花绽放效果，多种颜色随机组合</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🧧</div>
+                    <div class="feature-title">红包飘落</div>
+                    <div class="feature-desc">可点击的红包动画，点击触发惊喜特效</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏮</div>
+                    <div class="feature-title">灯笼闪烁</div>
+                    <div class="feature-desc">传统灯笼装饰，带呼吸光效和摆动动画</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎊</div>
+                    <div class="feature-title">纸屑飘落</div>
+                    <div class="feature-desc">彩色纸屑连续飘落，增添节日气氛</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">💬</div>
+                    <div class="feature-title">祝福语</div>
+                    <div class="feature-desc">新年祝福文字随机显示，渐入渐出效果</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 50px; padding: 30px; background: rgba(255, 255, 255, 0.05); border-radius: 15px;">
+                <h2 style="color: #ffd700; margin-bottom: 20px;">✨ 使用说明</h2>
+                <p style="font-size: 18px; line-height: 1.8; color: #ddd;">
+                    • 点击右侧控制面板按钮触发各种特效<br>
+                    • 点击飘落的红包可获得惊喜<br>
+                    • 所有特效完全由纯 HTML + CSS + JavaScript 实现<br>
+                    • 无需任何外部依赖，可直接在浏览器中运行<br>
+                    • 适用于任何带有 id="index1" 的 div 容器
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="controls fade-in">
+        <h3>🎮 特效控制</h3>
+        <button onclick="CNYEffects.triggerFireworks()">🎆 放烟花</button>
+        <button onclick="CNYEffects.addBlessing()">💬 显示祝福</button>
+        <button onclick="CNYEffects.toggleEffects()">⏯️ 暂停/继续</button>
+        <button onclick="CNYEffects.triggerMultipleFireworks()">🎇 烟花秀</button>
+    </div>
+
+    <!-- 信息面板 -->
+    <div class="info-panel fade-in">
+        <h4>📋 技术信息</h4>
+        <p>✅ 纯原生 JavaScript</p>
+        <p>✅ 无外部依赖</p>
+        <p>✅ 响应式设计</p>
+        <p>✅ Canvas 2D 动画</p>
+        <p>✅ CSS3 动画效果</p>
+        <p style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 215, 0, 0.3);">
+            <a href="https://github.com" target="_blank">📦 查看源代码</a>
+        </p>
+    </div>
+
+    <!-- JavaScript 特效代码 -->
+    <script>
+        /**
+         * 中国农历新年特效类
+         * 完整的春节特效解决方案
+         * 包含：烟花、红包、灯笼、纸屑、祝福语
+         */
+        class CNYEffects {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) {
+                    console.error(`容器 #${containerId} 未找到`);
+                    return;
+                }
+
+                // 状态管理
+                this.isRunning = true;
+                this.particles = [];
+                
+                // 画布相关
+                this.fireworksCanvas = null;
+                this.fireworksCtx = null;
+                
+                // 祝福语库
+                this.blessings = [
+                    '新年快乐', '恭喜发财', '万事如意', '龙年大吉',
+                    '心想事成', '福星高照', '吉祥如意', '财源广进',
+                    '阖家欢乐', '身体健康', '步步高升', '事业有成'
+                ];
+
+                this.init();
+            }
+
+            /**
+             * 初始化所有特效
+             */
+            init() {
+                console.log('🎉 初始化春节特效...');
+                
+                // 初始化烟花画布
+                this.initFireworksCanvas();
+                
+                // 创建灯笼装饰
+                this.createLanterns();
+                
+                // 启动各种效果
+                this.startRedEnvelopes();
+                this.startConfetti();
+                this.startFireworksAnimation();
+                this.startBlessings();
+                
+                console.log('✅ 春节特效初始化完成！');
+            }
+
+            /**
+             * 初始化烟花画布
+             */
+            initFireworksCanvas() {
+                let canvas = this.container.querySelector('#fireworks-canvas');
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = 'fireworks-canvas';
+                    this.container.insertBefore(canvas, this.container.firstChild);
+                }
+                
+                this.fireworksCanvas = canvas;
+                this.fireworksCtx = canvas.getContext('2d');
+                this.resizeCanvas();
+                
+                // 响应窗口大小变化
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+
+            /**
+             * 调整画布大小
+             */
+            resizeCanvas() {
+                if (!this.fireworksCanvas) return;
+                const rect = this.container.getBoundingClientRect();
+                this.fireworksCanvas.width = rect.width;
+                this.fireworksCanvas.height = rect.height;
+            }
+
+            /**
+             * 创建烟花粒子
+             */
+            createFirework(x, y) {
+                const colors = ['#ff4444', '#ffd700', '#ff6b00', '#ff1493', '#00ff00', '#00ffff', '#ff00ff'];
+                const particleCount = 80 + Math.random() * 40;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 * i) / particleCount;
+                    const velocity = 2 + Math.random() * 4;
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 1,
+                        decay: 0.008 + Math.random() * 0.005,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: 2 + Math.random() * 3
+                    });
+                }
+            }
+
+            /**
+             * 更新烟花动画
+             */
+            updateFireworks() {
+                if (!this.fireworksCtx) return;
+                
+                // 半透明黑色覆盖，产生拖尾效果
+                this.fireworksCtx.fillStyle = 'rgba(26, 26, 46, 0.15)';
+                this.fireworksCtx.fillRect(0, 0, this.fireworksCanvas.width, this.fireworksCanvas.height);
+
+                // 更新和绘制所有粒子
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    
+                    // 更新位置
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05; // 重力效果
+                    p.life -= p.decay;
+
+                    // 移除消失的粒子
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+
+                    // 绘制粒子
+                    this.fireworksCtx.globalAlpha = p.life;
+                    this.fireworksCtx.fillStyle = p.color;
+                    this.fireworksCtx.beginPath();
+                    this.fireworksCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.fireworksCtx.fill();
+                }
+
+                this.fireworksCtx.globalAlpha = 1;
+            }
+
+            /**
+             * 启动烟花动画循环
+             */
+            startFireworksAnimation() {
+                const animate = () => {
+                    if (this.isRunning) {
+                        this.updateFireworks();
+                        
+                        // 随机自动触发烟花
+                        if (Math.random() < 0.015) {
+                            const x = 100 + Math.random() * (this.fireworksCanvas.width - 200);
+                            const y = 50 + Math.random() * (this.fireworksCanvas.height * 0.5);
+                            this.createFirework(x, y);
+                        }
+                    }
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+
+            /**
+             * 手动触发烟花
+             */
+            triggerFireworks() {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const x = 100 + Math.random() * (this.fireworksCanvas.width - 200);
+                        const y = 100 + Math.random() * 200;
+                        this.createFirework(x, y);
+                    }, i * 300);
+                }
+            }
+
+            /**
+             * 触发烟花秀（多次烟花）
+             */
+            triggerMultipleFireworks() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const x = 100 + Math.random() * (this.fireworksCanvas.width - 200);
+                        const y = 50 + Math.random() * 300;
+                        this.createFirework(x, y);
+                    }, i * 500);
+                }
+            }
+
+            /**
+             * 创建红包
+             */
+            createRedEnvelope() {
+                const envelope = document.createElement('div');
+                envelope.className = 'red-envelope';
+                envelope.style.left = Math.random() * (this.container.offsetWidth - 50) + 'px';
+                envelope.style.top = '-70px';
+                
+                const duration = 8 + Math.random() * 4;
+                envelope.style.animationDuration = duration + 's';
+                envelope.style.animationDelay = Math.random() * 2 + 's';
+                
+                // 点击红包事件
+                envelope.addEventListener('click', (e) => {
+                    e.target.style.animation = 'none';
+                    e.target.style.transition = 'all 0.5s';
+                    e.target.style.transform = 'scale(0) rotate(360deg)';
+                    e.target.style.opacity = '0';
+                    
+                    setTimeout(() => e.target.remove(), 500);
+                    
+                    // 触发烟花效果
+                    const rect = e.target.getBoundingClientRect();
+                    const containerRect = this.container.getBoundingClientRect();
+                    this.createFirework(
+                        rect.left - containerRect.left + 25,
+                        rect.top - containerRect.top + 35
+                    );
+                    
+                    // 显示祝福语
+                    this.addBlessing();
+                });
+                
+                this.container.appendChild(envelope);
+                
+                // 自动清理
+                setTimeout(() => {
+                    if (envelope.parentNode) {
+                        envelope.remove();
+                    }
+                }, (duration + 2) * 1000);
+            }
+
+            /**
+             * 启动红包飘落循环
+             */
+            startRedEnvelopes() {
+                setInterval(() => {
+                    if (this.isRunning) {
+                        this.createRedEnvelope();
+                    }
+                }, 3000);
+                
+                // 初始创建几个红包
+                setTimeout(() => this.createRedEnvelope(), 500);
+                setTimeout(() => this.createRedEnvelope(), 1500);
+            }
+
+            /**
+             * 创建灯笼装饰
+             */
+            createLanterns() {
+                const lanternTexts = ['春', '福', '喜', '财'];
+                const positions = [
+                    { top: '5%', left: '10%' },
+                    { top: '5%', right: '10%' },
+                    { top: '40%', left: '5%' },
+                    { top: '40%', right: '5%' }
+                ];
+
+                positions.forEach((pos, index) => {
+                    const lantern = document.createElement('div');
+                    lantern.className = 'lantern';
+                    Object.assign(lantern.style, pos);
+                    
+                    lantern.innerHTML = `
+                        <div class="lantern-rope"></div>
+                        <div class="lantern-body">
+                            <div class="lantern-text">${lanternTexts[index % lanternTexts.length]}</div>
+                        </div>
+                        <div class="lantern-tassel"></div>
+                    `;
+                    
+                    // 添加随机延迟的动画
+                    lantern.style.animationDelay = (Math.random() * 2) + 's';
+                    
+                    this.container.appendChild(lantern);
+                });
+            }
+
+            /**
+             * 创建纸屑
+             */
+            createConfetti() {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                const colors = ['#ff4444', '#ffd700', '#ff6b00', '#ff1493', '#00ff00', '#00ffff'];
+                const shapes = ['square', 'circle', 'triangle'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                confetti.style.left = Math.random() * this.container.offsetWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (6 + Math.random() * 4) + 's';
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                
+                // 根据形状设置样式
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'triangle') {
+                    confetti.style.width = '0';
+                    confetti.style.height = '0';
+                    confetti.style.backgroundColor = 'transparent';
+                    confetti.style.borderLeft = '5px solid transparent';
+                    confetti.style.borderRight = '5px solid transparent';
+                    confetti.style.borderBottom = '10px solid ' + colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                this.container.appendChild(confetti);
+                
+                // 自动清理
+                setTimeout(() => confetti.remove(), 12000);
+            }
+
+            /**
+             * 启动纸屑飘落循环
+             */
+            startConfetti() {
+                setInterval(() => {
+                    if (this.isRunning) {
+                        this.createConfetti();
+                    }
+                }, 400);
+            }
+
+            /**
+             * 添加祝福语
+             */
+            addBlessing() {
+                const blessing = document.createElement('div');
+                blessing.className = 'blessing-text';
+                blessing.textContent = this.blessings[Math.floor(Math.random() * this.blessings.length)];
+                
+                blessing.style.left = (20 + Math.random() * 60) + '%';
+                blessing.style.top = (30 + Math.random() * 40) + '%';
+                blessing.style.transform = 'translate(-50%, -50%)';
+                
+                this.container.appendChild(blessing);
+                
+                // 自动清理
+                setTimeout(() => blessing.remove(), 3000);
+            }
+
+            /**
+             * 启动祝福语循环
+             */
+            startBlessings() {
+                // 首次显示祝福语
+                setTimeout(() => this.addBlessing(), 2000);
+                
+                // 定期显示
+                setInterval(() => {
+                    if (this.isRunning) {
+                        this.addBlessing();
+                    }
+                }, 8000);
+            }
+
+            /**
+             * 切换特效开关
+             */
+            toggleEffects() {
+                this.isRunning = !this.isRunning;
+                console.log(this.isRunning ? '▶️ 特效继续' : '⏸️ 特效暂停');
+            }
+
+            /**
+             * 销毁所有特效
+             */
+            destroy() {
+                this.isRunning = false;
+                this.particles = [];
+                
+                // 清理所有特效元素
+                const elements = this.container.querySelectorAll('.red-envelope, .confetti, .blessing-text, .lantern');
+                elements.forEach(el => el.remove());
+                
+                if (this.fireworksCanvas) {
+                    this.fireworksCanvas.remove();
+                }
+                
+                console.log('🧹 特效已清理');
+            }
+        }
+
+        // 全局实例
+        let CNYEffectsInstance = null;
+
+        // 页面加载完成后自动初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎊 欢迎来到春节特效演示页面！');
+            CNYEffectsInstance = new CNYEffects('index1');
+            
+            // 将实例暴露到全局，方便控制面板调用
+            window.CNYEffects = CNYEffectsInstance;
+            
+            // 欢迎烟花
+            setTimeout(() => {
+                CNYEffectsInstance.triggerMultipleFireworks();
+            }, 1000);
+        });
+
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', () => {
+            if (CNYEffectsInstance) {
+                CNYEffectsInstance.destroy();
+            }
+        });
+    </script>
+</body>
+</html>
