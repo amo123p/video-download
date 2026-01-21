@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 春节特效演示 Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #index1 {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 烟花画布 */
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 997;
+        }
+
+        /* 红包 */
+        .red-envelope {
+            position: absolute;
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.5);
+            cursor: pointer;
+            animation: fall linear infinite;
+            z-index: 1001;
+        }
+
+        .red-envelope::before {
+            content: '福';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        /* 灯笼 */
+        .lantern {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            z-index: 999;
+        }
+
+        .lantern-body {
+            width: 100%;
+            height: 70px;
+            background: radial-gradient(ellipse at center, #ff4444, #cc0000);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .lantern-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(255, 68, 68, 1); }
+        }
+
+        /* 纸屑 */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall linear infinite;
+            z-index: 998;
+        }
+
+        @keyframes confettiFall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* 祝福语 */
+        .blessing-text {
+            position: absolute;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: blessingAnim 3s ease-out forwards;
+            z-index: 1002;
+        }
+
+        @keyframes blessingAnim {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+
+        /* 内容 */
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 60px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 20px;
+        }
+
+        /* 控制按钮 */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .controls button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .controls button:hover {
+            background: #cc0000;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .blessing-text { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="index1">
+        <canvas id="fireworks-canvas"></canvas>
+        
+        <div class="content">
+            <h1>🎉 新年快乐 🎉</h1>
+            <p style="font-size: 24px;">春节特效演示</p>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="CNYEffects.triggerFireworks()">🎆 烟花</button>
+        <button onclick="CNYEffects.addBlessing()">💬 祝福</button>
+        <button onclick="CNYEffects.toggleEffects()">⏯️ 暂停</button>
+    </div>
+
+    <script>
+        class CNYEffects {
+            constructor(id) {
+                this.container = document.getElementById(id);
+                this.isRunning = true;
+                this.particles = [];
+                this.blessings = ['新年快乐', '恭喜发财', '万事如意', '龙年大吉'];
+                this.init();
+            }
+
+            init() {
+                this.initCanvas();
+                this.createLanterns();
+                this.startEffects();
+            }
+
+            initCanvas() {
+                const canvas = this.container.querySelector('#fireworks-canvas');
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = this.container.offsetWidth;
+                this.canvas.height = this.container.offsetHeight;
+            }
+
+            createFirework(x, y) {
+                const colors = ['#ff4444', '#ffd700', '#ff6b00', '#ff1493'];
+                for (let i = 0; i < 60; i++) {
+                    const angle = (Math.PI * 2 * i) / 60;
+                    const velocity = 2 + Math.random() * 3;
+                    this.particles.push({
+                        x, y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 1,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: 2 + Math.random() * 2
+                    });
+                }
+            }
+
+            updateFireworks() {
+                this.ctx.fillStyle = 'rgba(26, 26, 46, 0.15)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05;
+                    p.life -= 0.01;
+
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                this.ctx.globalAlpha = 1;
+            }
+
+            startEffects() {
+                // 烟花动画
+                const animate = () => {
+                    if (this.isRunning) {
+                        this.updateFireworks();
+                        if (Math.random() < 0.02) {
+                            const x = Math.random() * this.canvas.width;
+                            const y = Math.random() * this.canvas.height * 0.5;
+                            this.createFirework(x, y);
+                        }
+                    }
+                    requestAnimationFrame(animate);
+                };
+                animate();
+
+                // 红包
+                setInterval(() => {
+                    if (this.isRunning) this.createRedEnvelope();
+                }, 3000);
+
+                // 纸屑
+                setInterval(() => {
+                    if (this.isRunning) this.createConfetti();
+                }, 400);
+
+                // 祝福语
+                setInterval(() => {
+                    if (this.isRunning) this.addBlessing();
+                }, 8000);
+            }
+
+            createRedEnvelope() {
+                const el = document.createElement('div');
+                el.className = 'red-envelope';
+                el.style.left = Math.random() * (this.container.offsetWidth - 50) + 'px';
+                el.style.top = '-70px';
+                el.style.animationDuration = (8 + Math.random() * 4) + 's';
+                
+                el.onclick = (e) => {
+                    const rect = e.target.getBoundingClientRect();
+                    this.createFirework(rect.left + 25, rect.top + 35);
+                    e.target.remove();
+                };
+                
+                this.container.appendChild(el);
+                setTimeout(() => el.remove(), 12000);
+            }
+
+            createLanterns() {
+                const texts = ['春', '福', '喜', '财'];
+                const positions = [
+                    { top: '5%', left: '10%' },
+                    { top: '5%', right: '10%' },
+                    { top: '40%', left: '5%' },
+                    { top: '40%', right: '5%' }
+                ];
+
+                positions.forEach((pos, i) => {
+                    const lantern = document.createElement('div');
+                    lantern.className = 'lantern';
+                    Object.assign(lantern.style, pos);
+                    lantern.innerHTML = `<div class="lantern-body"><div class="lantern-text">${texts[i]}</div></div>`;
+                    this.container.appendChild(lantern);
+                });
+            }
+
+            createConfetti() {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                const colors = ['#ff4444', '#ffd700', '#ff6b00', '#ff1493'];
+                el.style.left = Math.random() * this.container.offsetWidth + 'px';
+                el.style.top = '-10px';
+                el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                el.style.animationDuration = (6 + Math.random() * 4) + 's';
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                this.container.appendChild(el);
+                setTimeout(() => el.remove(), 12000);
+            }
+
+            addBlessing() {
+                const el = document.createElement('div');
+                el.className = 'blessing-text';
+                el.textContent = this.blessings[Math.floor(Math.random() * this.blessings.length)];
+                el.style.left = (20 + Math.random() * 60) + '%';
+                el.style.top = (30 + Math.random() * 40) + '%';
+                el.style.transform = 'translate(-50%, -50%)';
+                
+                this.container.appendChild(el);
+                setTimeout(() => el.remove(), 3000);
+            }
+
+            triggerFireworks() {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const x = Math.random() * this.canvas.width;
+                        const y = 100 + Math.random() * 200;
+                        this.createFirework(x, y);
+                    }, i * 300);
+                }
+            }
+
+            toggleEffects() {
+                this.isRunning = !this.isRunning;
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            window.CNYEffects = new CNYEffects('index1');
+        });
+    </script>
+</body>
+</html>
