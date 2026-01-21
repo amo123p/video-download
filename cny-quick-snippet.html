@@ -1,0 +1,55 @@
+<!-- 
+╔══════════════════════════════════════════════════════════════╗
+║  中国农历新年特效 - 快速集成代码片段                          ║
+║  只需复制粘贴到你的 HTML 页面中即可                           ║
+╚══════════════════════════════════════════════════════════════╝
+
+使用方法：
+1. 将这整段代码复制到你的 HTML 文件中
+2. 确保你有一个 id="index1" 的 div 元素
+3. 打开页面，特效会自动启动
+
+如果你的容器 ID 不是 "index1"，请修改最底部的 'index1' 为你的容器 ID
+-->
+
+<style>
+/* ========== 中国新年特效样式 ========== */
+.cny-fireworks-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:997}
+.cny-red-envelope{position:absolute;width:50px;height:70px;background:linear-gradient(135deg,#ff4444 0%,#cc0000 100%);border-radius:5px;box-shadow:0 5px 15px rgba(255,68,68,0.5);pointer-events:auto;cursor:pointer;animation:cnyFall linear infinite;z-index:1001}
+.cny-red-envelope::before{content:'福';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ffd700;font-size:28px;font-weight:bold}
+.cny-red-envelope::after{content:'';position:absolute;top:0;left:0;right:0;height:25px;background:linear-gradient(135deg,#cc0000 0%,#990000 100%);border-radius:5px 5px 0 0}
+@keyframes cnyFall{to{transform:translateY(calc(100vh + 70px)) rotate(360deg)}}
+.cny-lantern{position:absolute;width:60px;height:80px;z-index:999}
+.cny-lantern-body{width:100%;height:70px;background:radial-gradient(ellipse at center,#ff4444 0%,#cc0000 100%);border-radius:50%;position:relative;box-shadow:0 0 20px rgba(255,68,68,0.8);animation:cnyLanternGlow 2s ease-in-out infinite alternate}
+.cny-lantern-rope{position:absolute;top:-20px;left:50%;width:2px;height:20px;background:#8B4513;transform:translateX(-50%)}
+.cny-lantern-tassel{position:absolute;bottom:-15px;left:50%;width:20px;height:15px;background:linear-gradient(to bottom,#ffd700,#ffaa00);transform:translateX(-50%);clip-path:polygon(50% 0%,0% 30%,20% 100%,80% 100%,100% 30%)}
+.cny-lantern-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ffd700;font-size:20px;font-weight:bold}
+@keyframes cnyLanternGlow{0%,100%{box-shadow:0 0 20px rgba(255,68,68,0.8),0 0 40px rgba(255,68,68,0.4)}50%{box-shadow:0 0 30px rgba(255,68,68,1),0 0 60px rgba(255,68,68,0.6)}}
+.cny-confetti{position:absolute;width:10px;height:10px;pointer-events:none;animation:cnyConfettiFall linear infinite;z-index:998}
+@keyframes cnyConfettiFall{to{transform:translateY(calc(100vh + 20px)) rotate(720deg);opacity:0}}
+.cny-blessing-text{position:absolute;font-size:48px;font-weight:bold;color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,0.8),0 0 20px rgba(255,215,0,0.6),0 0 30px rgba(255,215,0,0.4),2px 2px 4px rgba(0,0,0,0.8);animation:cnyBlessingFadeIn 3s ease-out forwards;z-index:1002;pointer-events:none;white-space:nowrap}
+@keyframes cnyBlessingFadeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.5) translateY(-50px)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2) translateY(0)}100%{opacity:0;transform:translate(-50%,-50%) scale(1) translateY(50px)}}
+</style>
+
+<script>
+// ========== 中国新年特效脚本 ==========
+(function(){class CNYFestiveEffects{constructor(t,e={}){if(this.container=document.getElementById(t),!this.container)return void console.error(`容器 #${t} 未找到`);this.options={enableFireworks:!0,enableRedEnvelopes:!0,enableLanterns:!0,enableConfetti:!0,enableBlessings:!0,fireworksFrequency:.02,redEnvelopeInterval:3e3,confettiInterval:400,blessingInterval:8e3,customBlessings:null,...e},this.isRunning=!0,this.fireworksCanvas=null,this.fireworksCtx=null,this.particles=[],this.intervals=[],this.blessings=this.options.customBlessings||["新年快乐","恭喜发财","万事如意","龙年大吉","心想事成","福星高照","吉祥如意","财源广进","步步高升","阖家欢乐","身体健康","事业有成"],this.init()}init(){"static"===getComputedStyle(this.container).position&&(this.container.style.position="relative"),this.options.enableFireworks&&(this.initFireworksCanvas(),this.startFireworksAnimation()),this.options.enableLanterns&&this.createLanterns(),this.options.enableRedEnvelopes&&this.startRedEnvelopes(),this.options.enableConfetti&&this.startConfetti(),this.options.enableBlessings&&this.startBlessings()}initFireworksCanvas(){let t=this.container.querySelector(".cny-fireworks-canvas");t||(t=document.createElement("canvas"),t.className="cny-fireworks-canvas",this.container.insertBefore(t,this.container.firstChild)),this.fireworksCanvas=t,this.fireworksCtx=t.getContext("2d"),this.resizeCanvas(),window.addEventListener("resize",(()=>this.resizeCanvas()))}resizeCanvas(){this.fireworksCanvas&&(this.fireworksCanvas.width=this.container.offsetWidth,this.fireworksCanvas.height=this.container.offsetHeight)}createFirework(t,e){const i=["#ff4444","#ffd700","#ff6b00","#ff1493","#00ff00","#00ffff"];for(let s=0;s<80;s++){const n=2*Math.PI*s/80,o=2+3*Math.random();this.particles.push({x:t,y:e,vx:Math.cos(n)*o,vy:Math.sin(n)*o,life:1,color:i[Math.floor(Math.random()*i.length)],size:2+3*Math.random()})}}updateFireworks(){if(!this.fireworksCtx)return;this.fireworksCtx.fillStyle="rgba(0, 0, 0, 0.1)",this.fireworksCtx.fillRect(0,0,this.fireworksCanvas.width,this.fireworksCanvas.height);for(let t=this.particles.length-1;t>=0;t--){const e=this.particles[t];if(e.x+=e.vx,e.y+=e.vy,e.vy+=.05,e.life-=.01,e.life<=0){this.particles.splice(t,1);continue}this.fireworksCtx.globalAlpha=e.life,this.fireworksCtx.fillStyle=e.color,this.fireworksCtx.beginPath(),this.fireworksCtx.arc(e.x,e.y,e.size,0,2*Math.PI),this.fireworksCtx.fill()}this.fireworksCtx.globalAlpha=1}startFireworksAnimation(){const t=()=>{this.isRunning&&(this.updateFireworks(),Math.random()<this.options.fireworksFrequency&&this.createFirework(Math.random()*this.fireworksCanvas.width,Math.random()*this.fireworksCanvas.height*.6)),requestAnimationFrame(t)};t()}triggerFireworks(t=3){for(let e=0;e<t;e++)setTimeout((()=>{const t=Math.random()*this.fireworksCanvas.width,e=100+200*Math.random();this.createFirework(t,e)}),300*e)}createRedEnvelope(){const t=document.createElement("div");t.className="cny-red-envelope",t.style.left=Math.random()*(this.container.offsetWidth-50)+"px",t.style.top="-70px";const e=8+4*Math.random();t.style.animationDuration=e+"s",t.style.animationDelay=2*Math.random()+"s",t.addEventListener("click",(t=>{t.target.style.animation="none",t.target.style.transition="all 0.5s",t.target.style.transform="scale(0) rotate(360deg)",t.target.style.opacity="0",setTimeout((()=>t.target.remove()),500);if(this.options.enableFireworks){const e=t.target.getBoundingClientRect(),i=this.container.getBoundingClientRect();this.createFirework(e.left-i.left+25,e.top-i.top+35)}})),this.container.appendChild(t),setTimeout((()=>{t.parentNode&&t.remove()}),1e3*e+2e3)}startRedEnvelopes(){const t=setInterval((()=>{this.isRunning&&this.createRedEnvelope()}),this.options.redEnvelopeInterval);this.intervals.push(t)}createLanterns(){[{top:"5%",left:"10%"},{top:"5%",left:"85%"},{top:"40%",left:"5%"},{top:"40%",right:"5%"}].forEach(((t,e)=>{const i=document.createElement("div");i.className="cny-lantern",Object.assign(i.style,t),i.innerHTML=`\n                <div class="cny-lantern-rope"></div>\n                <div class="cny-lantern-body">\n                    <div class="cny-lantern-text">${["春","福","喜","财"][e%4]}</div>\n                </div>\n                <div class="cny-lantern-tassel"></div>\n            `,this.container.appendChild(i)}))}createConfetti(){const t=document.createElement("div");t.className="cny-confetti";const e=["#ff4444","#ffd700","#ff6b00","#ff1493"],i=["square","circle","triangle"][Math.floor(3*Math.random())];t.style.left=Math.random()*this.container.offsetWidth+"px",t.style.top="-10px",t.style.backgroundColor=e[Math.floor(Math.random()*e.length)],t.style.animationDuration=6+4*Math.random()+"s",t.style.animationDelay=2*Math.random()+"s","circle"===i?t.style.borderRadius="50%":"triangle"===i&&(t.style.width="0",t.style.height="0",t.style.backgroundColor="transparent",t.style.borderLeft="5px solid transparent",t.style.borderRight="5px solid transparent",t.style.borderBottom="10px solid "+e[Math.floor(Math.random()*e.length)]),this.container.appendChild(t),setTimeout((()=>{t.parentNode&&t.remove()}),12e3)}startConfetti(){const t=setInterval((()=>{this.isRunning&&this.createConfetti()}),this.options.confettiInterval);this.intervals.push(t)}addBlessing(t=null){const e=document.createElement("div");e.className="cny-blessing-text",e.textContent=t||this.blessings[Math.floor(Math.random()*this.blessings.length)],e.style.left=20+60*Math.random()+"%",e.style.top=30+40*Math.random()+"%",this.container.appendChild(e),setTimeout((()=>{e.parentNode&&e.remove()}),3e3)}startBlessings(){const t=setInterval((()=>{this.isRunning&&this.addBlessing()}),this.options.blessingInterval);this.intervals.push(t)}pause(){this.isRunning=!1}resume(){this.isRunning=!0}toggle(){return this.isRunning=!this.isRunning,this.isRunning}destroy(){this.isRunning=!1,this.particles=[],this.intervals.forEach((t=>clearInterval(t))),this.intervals=[];this.container.querySelectorAll(".cny-red-envelope, .cny-confetti, .cny-blessing-text, .cny-lantern, .cny-fireworks-canvas").forEach((t=>t.remove()))}}window.CNYFestiveEffects=CNYFestiveEffects,document.addEventListener("DOMContentLoaded",(function(){window.cnyEffects=new CNYFestiveEffects("index1")}))})();
+</script>
+
+<!-- 
+╔══════════════════════════════════════════════════════════════╗
+║  集成完成！特效已自动启动                                      ║
+║                                                              ║
+║  可选：添加控制按钮                                           ║
+║  <button onclick="cnyEffects.triggerFireworks()">放烟花</button>║
+║  <button onclick="cnyEffects.addBlessing()">显示祝福</button>  ║
+║  <button onclick="cnyEffects.toggle()">暂停/继续</button>      ║
+║                                                              ║
+║  自定义配置（将上面的脚本末尾替换为）：                        ║
+║  window.cnyEffects = new CNYFestiveEffects("index1", {       ║
+║      enableFireworks: true,                                  ║
+║      enableRedEnvelopes: true,                               ║
+║      fireworksFrequency: 0.03                                ║
+║  });                                                         ║
+╚══════════════════════════════════════════════════════════════╝
+-->

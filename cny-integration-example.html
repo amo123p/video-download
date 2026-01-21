@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>集成示例 - 中国新年特效</title>
+    <style>
+        /* 你的页面样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+        }
+
+        #index1 {
+            min-height: 100vh;
+            position: relative;
+            /* 确保容器有 position: relative 以便特效元素定位 */
+        }
+
+        .page-content {
+            position: relative;
+            z-index: 1;
+            padding: 50px;
+            color: white;
+            text-align: center;
+        }
+
+        .page-content h1 {
+            font-size: 48px;
+            color: #ffd700;
+            margin-top: 100px;
+        }
+
+        .page-content p {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 2000;
+        }
+
+        .control-panel button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .control-panel button:hover {
+            background: #cc0000;
+        }
+
+        .control-panel button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        ===================================
+        目标容器：id="index1"
+        特效将在这个容器内显示
+        ===================================
+    -->
+    <div id="index1">
+        <!-- 你的页面内容 -->
+        <div class="page-content">
+            <h1>🎉 恭喜发财，新年快乐！🎉</h1>
+            <p>这是一个集成示例页面</p>
+            <p>展示如何将中国新年特效集成到现有 HTML 页面中</p>
+            <p>使用右下角的控制面板来控制特效</p>
+        </div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <button onclick="cnyEffects.triggerFireworks()">🎆 放烟花</button>
+        <button onclick="cnyEffects.addBlessing()">🧧 显示祝福</button>
+        <button onclick="toggleEffects()">⏯️ <span id="toggleText">暂停</span></button>
+    </div>
+
+    <!-- 
+        ===================================
+        引入特效 JavaScript 文件
+        ===================================
+    -->
+    <script src="cny-festive-effects.js"></script>
+
+    <!-- 
+        ===================================
+        初始化特效
+        ===================================
+    -->
+    <script>
+        // 定义全局变量存储特效实例
+        let cnyEffects;
+
+        // DOM 加载完成后初始化特效
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建特效实例
+            cnyEffects = new CNYFestiveEffects('index1', {
+                // 配置选项（可选）
+                enableFireworks: true,        // 启用烟花
+                enableRedEnvelopes: true,     // 启用红包
+                enableLanterns: true,         // 启用灯笼
+                enableConfetti: true,         // 启用纸屑
+                enableBlessings: true,        // 启用祝福语
+                
+                // 高级配置
+                fireworksFrequency: 0.02,     // 烟花频率
+                redEnvelopeInterval: 3000,    // 红包间隔（毫秒）
+                confettiInterval: 400,        // 纸屑间隔（毫秒）
+                blessingInterval: 8000,       // 祝福语间隔（毫秒）
+                
+                // 自定义祝福语（可选）
+                customBlessings: [
+                    '新年快乐', '恭喜发财', '万事如意',
+                    '龙年大吉', '心想事成', '福星高照',
+                    '吉祥如意', '财源广进', '步步高升',
+                    '阖家欢乐', '身体健康', '事业有成'
+                ]
+            });
+
+            console.log('🎊 新年特效已启动！');
+        });
+
+        // 切换特效开关
+        function toggleEffects() {
+            const isRunning = cnyEffects.toggle();
+            document.getElementById('toggleText').textContent = isRunning ? '暂停' : '继续';
+        }
+
+        // 页面卸载时清理资源（可选）
+        window.addEventListener('beforeunload', function() {
+            if (cnyEffects) {
+                cnyEffects.destroy();
+            }
+        });
+    </script>
+
+    <!-- 
+        ===================================
+        其他使用示例
+        ===================================
+        
+        1. 只启用部分特效：
+        ───────────────────────────────────
+        cnyEffects = new CNYFestiveEffects('index1', {
+            enableFireworks: true,
+            enableRedEnvelopes: true,
+            enableLanterns: false,
+            enableConfetti: false,
+            enableBlessings: false
+        });
+
+        2. 响应用户操作：
+        ───────────────────────────────────
+        document.getElementById('myButton').addEventListener('click', function() {
+            cnyEffects.triggerFireworks(5);  // 放5个烟花
+            cnyEffects.addBlessing('龙年大吉');  // 显示祝福
+        });
+
+        3. 根据设备优化：
+        ───────────────────────────────────
+        const isMobile = /Android|webOS|iPhone|iPad/i.test(navigator.userAgent);
+        cnyEffects = new CNYFestiveEffects('index1', {
+            fireworksFrequency: isMobile ? 0.01 : 0.02,
+            redEnvelopeInterval: isMobile ? 5000 : 3000
+        });
+
+        4. 定时启动和停止：
+        ───────────────────────────────────
+        // 5秒后暂停特效
+        setTimeout(function() {
+            cnyEffects.pause();
+        }, 5000);
+
+        // 10秒后恢复特效
+        setTimeout(function() {
+            cnyEffects.resume();
+        }, 10000);
+
+        5. 完全销毁特效：
+        ───────────────────────────────────
+        cnyEffects.destroy();
+        cnyEffects = null;
+    -->
+</body>
+</html>
