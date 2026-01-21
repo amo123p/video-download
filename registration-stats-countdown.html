@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报名统计与倒计时组件</title>
+    <style>
+        /* 组件容器样式 */
+        .registration-component {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            font-family: 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* 已报名人数统计行 */
+        .stats-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-text {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 特效数字样式 */
+        .animated-number {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 8px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            position: relative;
+        }
+
+        /* 数字脉冲动画 */
+        .animated-number::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            border-radius: 5px;
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* 倒计时行 */
+        .countdown-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .countdown-label {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+            margin-right: 20px;
+        }
+
+        /* 翻页倒计时容器 */
+        .countdown-timer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 翻页数字单元 */
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+
+        /* 数字翻页容器 */
+        .flip-digit {
+            width: 50px;
+            height: 60px;
+            perspective: 100px;
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .flip-number {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: flipIn 0.6s ease-in-out;
+        }
+
+        /* 数字面 */
+        .digit-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .digit-face.front {
+            transform: rotateX(0deg);
+        }
+
+        .digit-face.back {
+            transform: rotateX(-180deg);
+        }
+
+        /* 时间单位标签 */
+        .time-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 分隔符 */
+        .separator {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        /* 动画关键帧 */
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        @keyframes flipIn {
+            0% { transform: rotateX(-90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .registration-component {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .stats-row {
+                flex-direction: column;
+                text-align: center;
+                padding: 12px;
+            }
+
+            .stats-text {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .animated-number {
+                font-size: 20px;
+                margin: 0 5px;
+            }
+
+            .countdown-row {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .countdown-label {
+                margin-right: 0;
+                margin-bottom: 15px;
+                font-size: 16px;
+            }
+
+            .countdown-timer {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .time-unit {
+                min-width: 50px;
+            }
+
+            .flip-digit {
+                width: 40px;
+                height: 50px;
+            }
+
+            .digit-face {
+                font-size: 20px;
+            }
+
+            .time-label {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .animated-number {
+                font-size: 18px;
+            }
+
+            .flip-digit {
+                width: 35px;
+                height: 45px;
+            }
+
+            .digit-face {
+                font-size: 18px;
+            }
+
+            .separator {
+                font-size: 18px;
+            }
+        }
+
+        /* 滚动数字动画 */
+        @keyframes numberRoll {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .number-roll {
+            animation: numberRoll 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-component">
+        <!-- 已报名人数统计行 -->
+        <div class="stats-row">
+            <div class="stats-text">
+                🎉 已报名人数：
+                <span class="animated-number" id="country-count">12</span>个国家 
+                <span class="animated-number" id="merchant-count">32</span>位商人
+            </div>
+        </div>
+
+        <!-- 报名截止倒计时行 -->
+        <div class="countdown-row">
+            <div class="countdown-label">报名截止倒计时：</div>
+            <div class="countdown-timer" id="countdown-timer">
+                <div class="time-unit">
+                    <div class="flip-digit">
+                        <div class="flip-number">
+                            <div class="digit-face front">00</div>
+                            <div class="digit-face back">00</div>
+                        </div>
+                    </div>
+                    <div class="time-label">天</div>
+                </div>
+                <div class="separator">:</div>
+                <div class="time-unit">
+                    <div class="flip-digit">
+                        <div class="flip-number">
+                            <div class="digit-face front">00</div>
+                            <div class="digit-face back">00</div>
+                        </div>
+                    </div>
+                    <div class="time-label">时</div>
+                </div>
+                <div class="separator">:</div>
+                <div class="time-unit">
+                    <div class="flip-digit">
+                        <div class="flip-number">
+                            <div class="digit-face front">00</div>
+                            <div class="digit-face back">00</div>
+                        </div>
+                    </div>
+                    <div class="time-label">分</div>
+                </div>
+                <div class="separator">:</div>
+                <div class="time-unit">
+                    <div class="flip-digit">
+                        <div class="flip-number">
+                            <div class="digit-face front">00</div>
+                            <div class="digit-face back">00</div>
+                        </div>
+                    </div>
+                    <div class="time-label">秒</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置截止日期
+        const deadlineDate = new Date('2026-02-01T23:59:59').getTime();
+
+        // 数字滚动特效函数
+        function animateNumber(element, targetValue, duration = 2000) {
+            const startValue = 0;
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // 使用easeOutCubic缓动函数
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentValue = Math.floor(startValue + (targetValue - startValue) * easeProgress);
+                
+                element.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
+        // 翻页倒计时更新函数
+        function updateFlipDigit(flipNumber, newValue) {
+            const frontFace = flipNumber.querySelector('.digit-face.front');
+            const backFace = flipNumber.querySelector('.digit-face.back');
+            
+            // 如果值没有变化，不执行动画
+            if (frontFace.textContent === newValue.toString().padStart(2, '0')) {
+                return;
+            }
+            
+            // 设置背面数字
+            backFace.textContent = newValue.toString().padStart(2, '0');
+            
+            // 添加翻转动画
+            flipNumber.style.animation = 'none';
+            flipNumber.offsetHeight; // 强制重排
+            flipNumber.style.animation = 'flipIn 0.6s ease-in-out';
+        }
+
+        // 倒计时主函数
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeLeft = deadlineDate - now;
+            
+            if (timeLeft <= 0) {
+                // 倒计时结束
+                document.getElementById('countdown-timer').innerHTML = 
+                    '<div style="font-size: 24px; color: #ff6b6b; font-weight: bold;">报名已截止！</div>';
+                return;
+            }
+            
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // 获取所有翻页数字容器
+            const flipNumbers = document.querySelectorAll('.flip-number');
+            
+            // 更新天、时、分、秒
+            updateFlipDigit(flipNumbers[0], days);
+            updateFlipDigit(flipNumbers[1], hours);
+            updateFlipDigit(flipNumbers[2], minutes);
+            updateFlipDigit(flipNumbers[3], seconds);
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启动数字滚动动画
+            const countryCount = document.getElementById('country-count');
+            const merchantCount = document.getElementById('merchant-count');
+            
+            // 添加滚动特效类
+            countryCount.classList.add('number-roll');
+            merchantCount.classList.add('number-roll');
+            
+            // 延迟启动数字动画，增强视觉效果
+            setTimeout(() => {
+                animateNumber(countryCount, 12, 2500);
+                setTimeout(() => {
+                    animateNumber(merchantCount, 32, 2500);
+                }, 500);
+            }, 800);
+            
+            // 启动倒计时
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+
+        // 添加触摸设备优化
+        if ('ontouchstart' in window) {
+            document.addEventListener('touchstart', function() {}, {passive: true});
+        }
+    </script>
+</body>
+</html>
