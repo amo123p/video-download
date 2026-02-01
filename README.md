@@ -1,65 +1,46 @@
-# 🎬 多平台视频下载器 V2.0
+# 领界数字建筑品牌官网
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![yt-dlp](https://img.shields.io/badge/yt--dlp-latest-green.svg)](https://github.com/yt-dlp/yt-dlp)
-[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+本项目为一个纯前端多页面网站，展示数字建筑师与物业经理的品牌定位。所有页面均可直接用浏览器打开，无需后端环境。
 
-一款功能强大的视频下载工具，支持 YouTube、Bilibili、Twitter 等 1000+ 网站，支持 4K/8K 超高清视频下载。
+## 目录结构
 
+```
+/ (项目根目录)
+├── index.html
+├── services.html
+├── process.html
+├── portfolio.html
+├── about.html
+├── blog.html
+├── contact.html
+├── css/
+│   └── style.css
+├── js/
+│   └── script.js
+├── assets/
+│   └── placeholder.svg
+└── README.md
+```
 
-## ✨ 功能特性
+## 使用方式
 
-### 🎯 核心功能
-- **多平台支持** - 支持 YouTube、Bilibili、Twitter、TikTok、Instagram 等 1000+ 网站
-- **超高清下载** - 支持 4K/8K/HDR 视频下载
-- **批量下载** - 支持多链接批量下载、播放列表、频道下载
-- **多线程加速** - 分片多线程下载，速度更快
-- **格式选择** - 视频+音频、仅视频、仅音频多种模式
+1. 下载或解压本项目。
+2. 直接双击 `index.html`，即可在浏览器中查看首页。
+3. 通过顶部导航菜单在各页面之间切换。
 
-### 🛠️ 高级特性
-- **代理支持** - 支持 HTTP/HTTPS/SOCKS5 代理
-- **Cookies 导入** - 支持从浏览器导入 Cookies，下载会员视频
-- **自动合并** - 内置 FFmpeg 自动合并音视频流
-- **字幕嵌入** - 自动下载并嵌入字幕
-- **断点续传** - 支持下载中断后继续
+## 内容修改指南
 
-### 💡 用户体验
-- **深色主题** - 护眼深色界面
-- **实时进度** - 下载进度、速度、剩余时间实时显示
-- **配置持久化** - 自动保存用户配置
-- **一键更新** - 内置 yt-dlp 更新功能
+- 文本内容：直接编辑对应的 HTML 页面中的文案。
+- 视觉样式：统一在 `css/style.css` 中调整颜色、间距、字体等。
+- 交互逻辑：分类筛选与表单验证逻辑位于 `js/script.js`。
+- 图片素材：替换 `assets/placeholder.svg` 为真实图片，并保持文件名不变或同步更新 HTML 引用。
 
-## 📸 界面截图
+## 兼容性说明
 
-<details>
-<summary>点击展开查看截图</summary>
+- 支持主流现代浏览器（Chrome、Edge、Safari、Firefox）最新版本。
+- 响应式布局适配 1920px、768px、375px 等常见屏幕尺寸。
 
-### 主界面
-![主界面](screenshots/main.png)
+## 性能与资源说明
 
-### 设置界面
-![设置](screenshots/settings.png)
-
-### 下载中
-![下载](screenshots/downloading.png)
-
-</details>
-
-## 🚀 快速开始
-
-### 方式一：打包 EXE（推荐）
-
-1. 下载1.py
-2. 自行打包
-3. 双击运行即可使用
-
-### 方式二：从源码运行
-
-```bash
-# 克隆项目
-git clone https://github.com/amo123p/video-download.git
-cd video-download
-
-# 运行程序
-python video.py
+- 采用纯 HTML/CSS/JS，无外部依赖，加载速度快。
+- 图片为 SVG 占位符，可替换为压缩后的真实素材以进一步优化性能。
